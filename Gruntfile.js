@@ -34,7 +34,7 @@ module.exports = function (grunt) {
       },
       compass: {
         files: ['<%= yeoman.app %>/_scss/**/*.{scss,sass}'],
-        tasks: ['compass:server', 'autoprefixer']
+        tasks: ['compass:server']
       },
       jekyll: {
         files: [
@@ -122,10 +122,10 @@ module.exports = function (grunt) {
         imagesDir: '<%= yeoman.app %>/img',
         javascriptsDir: '<%= yeoman.app %>/js',
         fontsDir: '<%= yeoman.app %>/fonts',
-        httpFontsPath: '/fonts',
+        httpFontsPath: '../fonts',
         relativeAssets: false,
-        httpImagesPath: '/img',
-        httpGeneratedImagesPath: '/img',
+        httpImagesPath: '../img',
+        httpGeneratedImagesPath: '../img',
         outputStyle: 'expanded',
         importPath: '<%= yeoman.app %>/_bower_components',
         // raw: 'extensions_dir = "<%= yeoman.app %>/_bower_components"\n'
@@ -241,11 +241,14 @@ module.exports = function (grunt) {
             'img/**/*',
             'fonts/**/*',
             // Like Jekyll, exclude files & folders prefixed with an underscore.
-            '!**/_*{,/**}'
+            '!**/_*{,/**}',
             // Explicitly add any files your site needs for distribution here.
             //'_bower_components/jquery/jquery.min.js',
-            //'favicon.ico',
-            //'apple-touch*.png'
+            'favicon.ico',
+            'apple-touch*.png',
+            'mstile-*.png',
+            'favicon-*.png',
+            'android-chrome-*.png'
           ],
           dest: '<%= yeoman.dist %>'
         }]
@@ -263,18 +266,31 @@ module.exports = function (grunt) {
             '<%= yeoman.dist %>/img/**/*.{gif,jpg,jpeg,png,svg,webp}',
             '!<%= yeoman.dist %>/img/{covers,covers-hd}/*',
             '!<%= yeoman.dist %>/img/{logos,logos-hd}/*',
+            '!<%= yeoman.dist %>/img/{photo-hover,photo-hover-hd}/*',
+            '!<%= yeoman.dist %>/img/share/*',
             '<%= yeoman.dist %>/fonts/**/*.{eot*,otf,svg,ttf,woff}'
           ]
         }]
       }
     },
     buildcontrol: {
-      dist: {
+      options: {
+        dir: 'dist',
+        commit: true,
+        push: true,
+        connectCommits: false,
+        message: 'Built %sourceName% from commit %sourceCommit% on branch %sourceBranch%'
+      },
+      homolog: {
         options: {
-          remote: '../',
-          branch: 'gh-pages',
-          commit: true,
-          push: true
+          remote: 'git@bitbucket.org:frontphant/centro-deploy.git',
+          branch: 'homolog'
+        }
+      },
+      prod: {
+        options: {
+          remote: 'git@bitbucket.org:frontphant/centro-deploy.git',
+          branch: 'master'
         }
       }
     },
@@ -324,7 +340,7 @@ module.exports = function (grunt) {
       },
       app: {
         ignorePath: /^\/|\.\./,
-        src: ['<%= yeoman.app %>/_layouts/{default,place}.html'],
+        src: ['<%= yeoman.app %>/_layouts/{about,default,place}.html'],
         exclude: ['_bower_components/bootstrap-sass-official/assets/javascripts/bootstrap.js']
       },
       sass: {
@@ -364,8 +380,8 @@ module.exports = function (grunt) {
     'clean:server',
     'jekyll:check',
     'compass:server',
-    'jshint:all',
-    'csslint:check'
+    // 'jshint:all',
+    // 'csslint:check'
     // 'scsslint'
   ]);
 
@@ -387,7 +403,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('deploy', [
     'check',
-    'test',
+    // 'test',
     'build',
     'buildcontrol'
     ]);
@@ -397,4 +413,14 @@ module.exports = function (grunt) {
     'test',
     'build'
   ]);
+
+  grunt.registerTask('deploy:homolog', [
+    'build',
+    'buildcontrol:homolog'
+    ]);
+
+  grunt.registerTask('deploy:prod', [
+    'build',
+    'buildcontrol:prod'
+    ]);
 };
